@@ -1,5 +1,6 @@
-# IPTABLES BLOCK SCRIPT v0.0.2
 #!/bin/bash
+#
+# IPTABLES BLOCK SCRIPT v0.0.2
 
 EXTIF="eth0";
 TUNIF="tun0";

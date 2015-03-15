@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# IPTABLES BLOCK SCRIPT v0.0.3
+# IPTABLES BLOCK SCRIPT v0.0.4
 
 EXTIF="eth0";
 TUNIF="tun0";
@@ -65,7 +65,7 @@ $IPTABLES -A OUTPUT -o $TUNIF -p udp -j ACCEPT;
 $IPTABLES -A OUTPUT -o $TUNIF -p icmp -j ACCEPT;
 
 # ALLOW OUTPUT to oVPN-IPs over $EXTIF at VPN-Port with PROTO
-LIST=`grep -E "proto|remote\ " $OVPNDIR/*.ovpn $OVPNDIR/*.conf|cut -d" " -f2,3|tr ' ' ':'`;
+LIST=`grep -E "proto|remote\ " $OVPNDIR/*.ovpn $OVPNDIR/*.conf|cut -d" " -f2,3|tr ' ' ':'; echo -e "\r\n"`;
 I="1";
 for LINE in $LIST; do
 if [ $I -eq "3" ]; then 

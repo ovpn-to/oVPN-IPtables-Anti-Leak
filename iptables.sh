@@ -26,6 +26,12 @@ DEBUGOUTPUT="0";
 
 ##############################
 
+# Check if we're root
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root (e.g. sudo $0)" 1>&2
+   exit 1
+fi
+
 #Doing Backup from existing IPtables
 $IP4TABSSAVE > $IP4FILESAVE && echo "Backuped ip4tables to $IP4FILESAVE";
 $IP6TABSSAVE > $IP6FILESAVE && echo "Backuped ip6tables to $IP6FILESAVE";

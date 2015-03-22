@@ -7,7 +7,7 @@ Blocks everything except connections to VPN Server-IPs with matching port and pr
 Fire up a terminal and enter these lines:
 
     # if you're not root, you will need to open a root shell:
-    sudo -s
+    'sudo -s' or 'su'
     wget https://github.com/ovpn-to/oVPN.to-IPtables-Anti-Leak/raw/master/iptables.sh -O /root/iptables.sh
     chmod +x /root/iptables.sh
     exit

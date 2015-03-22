@@ -14,4 +14,5 @@ Fire up a terminal and enter these lines:
 Now to activate the script run `sudo /root/iptables.sh`, to deactivate it run `sudo /root/iptables.sh unload`.
 
 ## Configuration
-You can enable connections to your local network, if you want. Just set `ALLOWLAN` to 1 at the top of `/root/iptables.sh` to enable all traffic to 192.168.0.0/16.
+You can enable connections to your local network, if you want.
+Set `ALLOWLAN` to 1 at the top of `/root/iptables.sh` to enable all traffic to 192.168.0.0/16.

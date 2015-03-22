@@ -10,7 +10,7 @@ Fire up a terminal and enter these lines:
     sudo -s
     wget https://github.com/ovpn-to/oVPN.to-IPtables-Anti-Leak/raw/master/iptables.sh -O /root/iptables.sh
     chmod +x /root/iptables.sh
-
+    exit
 Now to activate the script run `sudo /root/iptables.sh`, to deactivate it run `sudo /root/iptables.sh unload`.
 
 ## Configuration

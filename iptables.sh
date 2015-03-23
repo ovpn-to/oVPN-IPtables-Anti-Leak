@@ -1,6 +1,8 @@
 #!/bin/bash
 #
-# IPTABLES BLOCK SCRIPT v0.0.8
+# oVPN.to IPtables Anti-Leak Script v0.0.8
+#
+# Setup Instructions and ReadMe here: https://github.com/ovpn-to/oVPN.to-IPtables-Anti-Leak
 
 EXTIF="wlan0 p4p1 eth0";
 TUNIF="tun0";

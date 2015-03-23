@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# IPTABLES BLOCK SCRIPT v0.0.6
+# IPTABLES BLOCK SCRIPT v0.0.7
 
-EXTIF="eth0";
+EXTIF="wlan0 p4p1 eth0";
 TUNIF="tun0";
 OVPNDIR="/etc/openvpn";
 LANRANGE="192.168.0.0/16"
@@ -20,17 +20,13 @@ IP6FILESAVE="/root/save.ip6tables.txt";
 
 DEBUGOUTPUT="0";
 
-# SETUP: chmod +x iptables.sh 
-# START: ./iptables.sh
-# UNLOAD: ./iptables.sh unload
-
 ##############################
 
 # Check if we're root
 if [[ $EUID -ne 0 ]]; then
-   echo "This script must be run as root (e.g. sudo $0)" 1>&2
-   exit 1
-fi
+   echo "This script must be run as root (e.g. sudo $0)";
+   exit 1;
+fi;
 
 #Doing Backup from existing IPtables
 $IP4TABSSAVE > $IP4FILESAVE && echo "Backuped ip4tables to $IP4FILESAVE";
@@ -50,7 +46,22 @@ $IP6TABLES -P OUTPUT ACCEPT
 echo "Rules unloaded" && exit 0;
 fi;
 
-
+# Select external Interface if defined multiple EXTIF="wlan0 p4p1 eth0";
+if [ `echo $EXTIF |wc -w` -gt 1 ]; then
+   echo -n "Multiple external Interfaces found, try: ";
+    for IF in $EXTIF; do
+      echo -n " $IF ";
+      ifconfig $IF >/dev/null 2>/dev/null && EXT=$IF && break;
+      echo -n "(down),";
+    done;
+    if [ ! -z $EXT ]; then
+       EXTIF=$EXT;
+       echo -e "\nUsing $EXTIF as external Interface";
+       sleep 3;
+    else
+       echo "Could not find Interface" && exit 1;
+    fi;
+fi;
 
 # Flush iptables
 $IP4TABLES -F

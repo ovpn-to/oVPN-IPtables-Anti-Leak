@@ -11,11 +11,16 @@ Fire up a terminal and enter these lines:
     wget https://github.com/ovpn-to/oVPN.to-IPtables-Anti-Leak/raw/master/iptables.sh -O /root/iptables.sh
     chmod +x /root/iptables.sh
     exit
-Now to activate the script run `sudo /root/iptables.sh`, to deactivate it run `sudo /root/iptables.sh unload`.
+Activate the script with `sudo /root/iptables.sh`, to deactivate it run `sudo /root/iptables.sh unload`.
 
 ## Configuration
     You can enable connections to your local network, but this could make DNS leaks possible!
     Use DNS Server 172.16.32.1 with connected oVPN.to!
     :~# echo "nameserver 172.16.32.1" > /etc/resolv.conf;
     Set `ALLOWLAN` to 1 at the top of `/root/iptables.sh` to enable all traffic to 192.168.0.0/16.
+    
+## Load Rules on Reboot
+    Debian/Ubunt/Mint: 
+    Add a line with "/root/iptables.sh >/dev/null 2>/dev/null > /root/iptables.log" into "/etc/rc.local" before "exit 0" !
+    You can review load of rules from file: /root/iptables.log
     

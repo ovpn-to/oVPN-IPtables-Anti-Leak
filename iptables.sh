@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# IPTABLES BLOCK SCRIPT v0.0.7
+# IPTABLES BLOCK SCRIPT v0.0.8
 
 EXTIF="wlan0 p4p1 eth0";
 TUNIF="tun0";
@@ -59,7 +59,15 @@ if [ `echo $EXTIF |wc -w` -gt 1 ]; then
        echo -e "\nUsing $EXTIF as external Interface";
        sleep 3;
     else
-       echo "Could not find Interface" && exit 1;
+       echo -e "\nCould not find Interface, trying from route"
+       EXT=`route -n |tr -s ' ' | awk '$3=="0.0.0.0" { print $0 }' | cut -d" " -f8`;
+       if [ `echo $EXT |wc -w` -eq 1 ]; then
+          EXTIF=$EXT;
+          echo "Using $EXTIF as external Interface";
+       else
+          echo "Error: Could not detect any external Interface";
+          exit 1;
+       fi;
     fi;
 fi;
 

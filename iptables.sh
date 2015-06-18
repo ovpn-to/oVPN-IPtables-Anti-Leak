@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# oVPN.to IPtables Anti-Leak Script v0.0.8
+# oVPN.to IPtables Anti-Leak Script v0.0.9
 #
 # Setup Instructions and ReadMe here: https://github.com/ovpn-to/oVPN.to-IPtables-Anti-Leak
 
@@ -9,6 +9,8 @@ TUNIF="tun0";
 OVPNDIR="/etc/openvpn";
 LANRANGE="192.168.0.0/16"
 ALLOWLAN="0";
+ALLOW_LAN_TCP_PORTS="8888 9999"
+ALLOW_LAN_UDP_PORTS=""
 IP4TABLES="/sbin/iptables";
 IP6TABLES="/sbin/ip6tables";
 
@@ -139,6 +141,16 @@ else
  $IP6TRESTORE $IP6TABSSAVE && echo "FAILED: reloaded from backup: $IP6FILESAVE";
  exit 1
 fi;
+
+for PORT in $ALLOW_LAN_TCP_PORTS; do
+ $IP4TABLES -A INPUT -i $EXTIF -p tcp --dport $PORT -j ACCEPT;
+ $IP6TABLES -A INPUT -i $EXTIF -p tcp --dport $PORT -j ACCEPT;
+done
+
+for PORT in $ALLOW_LAN_UDP_PORTS; do
+ $IP4TABLES -A INPUT -i $EXTIF -p udp --dport $PORT -j ACCEPT;
+ $IP6TABLES -A INPUT -i $EXTIF -p udp --dport $PORT -j ACCEPT;
+done
 
 # STATUS
 $IP4TABLES -nvL

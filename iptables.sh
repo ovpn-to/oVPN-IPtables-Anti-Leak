@@ -1,16 +1,22 @@
 #!/bin/bash
 #
-# oVPN.to IPtables Anti-Leak Script v0.0.9
+# oVPN.to IPtables Anti-Leak Script v0.1.0
 #
 # Setup Instructions and ReadMe here: https://github.com/ovpn-to/oVPN.to-IPtables-Anti-Leak
 
 EXTIF="wlan0 p4p1 eth0";
 TUNIF="tun0";
 OVPNDIR="/etc/openvpn";
-LANRANGE="192.168.0.0/16"
+LANRANGEv4="192.168.0.0/16"
 ALLOWLAN="0";
-ALLOW_LAN_TCP_PORTS="8888 9999"
+
+ALLOW_LAN_TCP_PORTS=""
 ALLOW_LAN_UDP_PORTS=""
+
+ALLOW_VPN_TCP_PORTFORWARDS=""
+ALLOW_VPN_UDP_PORTFORWARDS=""
+
+
 IP4TABLES="/sbin/iptables";
 IP6TABLES="/sbin/ip6tables";
 
@@ -94,20 +100,31 @@ $IP4TABLES -A INPUT -i $EXTIF -m state --state ESTABLISHED,RELATED -j ACCEPT
 $IP4TABLES -A INPUT -i $TUNIF -m state --state ESTABLISHED,RELATED -j ACCEPT
 $IP4TABLES -A OUTPUT -o $EXTIF -m state --state ESTABLISHED,RELATED -j ACCEPT
 
+$IP6TABLES -A INPUT -i $EXTIF -m state --state ESTABLISHED,RELATED -j ACCEPT
+$IP6TABLES -A INPUT -i $TUNIF -m state --state ESTABLISHED,RELATED -j ACCEPT
+$IP6TABLES -A OUTPUT -o $EXTIF -m state --state ESTABLISHED,RELATED -j ACCEPT
+
 # Allow loopback interface to do anything
 $IP4TABLES -A INPUT -i lo -j ACCEPT
 $IP4TABLES -A OUTPUT -o lo -j ACCEPT
 
+$IP6TABLES -A INPUT -i lo -j ACCEPT
+$IP6TABLES -A OUTPUT -o lo -j ACCEPT
+
 if [ $ALLOWLAN -eq "1" ]; then
 # Allow LAN access
-$IP4TABLES -A INPUT -i $EXTIF -s $LANRANGE -j ACCEPT 
-$IP4TABLES -A OUTPUT -o $EXTIF -d $LANRANGE -j ACCEPT
+$IP4TABLES -A INPUT -i $EXTIF -s $LANRANGEv4 -j ACCEPT 
+$IP4TABLES -A OUTPUT -o $EXTIF -d $LANRANGEv4 -j ACCEPT
 fi;
 
 # Allow OUT over tunIF
 $IP4TABLES -A OUTPUT -o $TUNIF -p tcp -j ACCEPT;
 $IP4TABLES -A OUTPUT -o $TUNIF -p udp -j ACCEPT;
 $IP4TABLES -A OUTPUT -o $TUNIF -p icmp -j ACCEPT;
+
+$IP6TABLES -A OUTPUT -o $TUNIF -p tcp -j ACCEPT;
+$IP6TABLES -A OUTPUT -o $TUNIF -p udp -j ACCEPT;
+$IP6TABLES -A OUTPUT -o $TUNIF -p ipv6-icmp -j ACCEPT;
 
 # ALLOW OUTPUT to oVPN-IPs over $EXTIF at VPN-Port with PROTO
 
@@ -129,7 +146,15 @@ while read CONFIGFILE; do
   PROTO=`grep "proto\ " "$CONFIGFILE" | cut -d" " -f2`;
  fi;
  test $DEBUGOUTPUT -eq "1" && echo "$IPDATA $IPPORT $PROTO";
- $IP4TABLES -A OUTPUT -o $EXTIF -d $IPDATA -p $PROTO --dport $IPPORT -j ACCEPT;
+ if ([ $PROTO = "udp6" ]||[ $PROTO = "tcp6" ]); then
+   test $PROTO = "udp6" && $PROTO="udp";
+   test $PROTO = "tcp6" && $PROTO="tcp";
+   $IP6TABLES -A OUTPUT -o $EXTIF -d $IPDATA -p $PROTO --dport $IPPORT -j ACCEPT;
+ else
+  $IP4TABLES -A OUTPUT -o $EXTIF -d $IPDATA -p $PROTO --dport $IPPORT -j ACCEPT;
+ fi;
+
+
  L=$(expr $L + 1);
 done < <(echo "$OVPNCONFIGS");
 
@@ -150,6 +175,16 @@ done
 for PORT in $ALLOW_LAN_UDP_PORTS; do
  $IP4TABLES -A INPUT -i $EXTIF -p udp --dport $PORT -j ACCEPT;
  $IP6TABLES -A INPUT -i $EXTIF -p udp --dport $PORT -j ACCEPT;
+done
+
+for PORT in $ALLOW_VPN_TCP_PORTFORWARDS; do
+ $IP4TABLES -A INPUT -i $TUNIF -p tcp --dport $PORT -j ACCEPT;
+ $IP6TABLES -A INPUT -i $TUNIF -p tcp --dport $PORT -j ACCEPT;
+done
+
+for PORT in $ALLOW_VPN_UDP_PORTFORWARDS; do
+ $IP4TABLES -A INPUT -i $TUNIF -p udp --dport $PORT -j ACCEPT;
+ $IP6TABLES -A INPUT -i $TUNIF -p udp --dport $PORT -j ACCEPT;
 done
 
 # STATUS

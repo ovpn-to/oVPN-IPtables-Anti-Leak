@@ -4,10 +4,10 @@
 #
 # Setup Instructions and ReadMe here: https://github.com/ovpn-to/oVPN.to-IPtables-Anti-Leak
 
-EXTIF="wlan0 p4p1 eth0 enp2s0 enp3s0";
+EXTIF="wlan0 p4p1 eth0 enp2s0 enp3s0 enp0s25";
 TUNIF="tun0";
 OVPNDIR="/etc/openvpn";
-LANRANGEv4="192.168.0.0/16"
+LANRANGESv4="192.168.0.0/16 10.0.123.0/24"
 ALLOWLAN="0";
 
 ALLOW_LAN_TCP_PORTS=""
@@ -113,8 +113,10 @@ $IP6TABLES -A OUTPUT -o lo -j ACCEPT
 
 if [ $ALLOWLAN -eq "1" ]; then
 # Allow LAN access
+for LANRANGEv4 in $LANRANGESv4; do
 $IP4TABLES -A INPUT -i $EXTIF -s $LANRANGEv4 -j ACCEPT 
 $IP4TABLES -A OUTPUT -o $EXTIF -d $LANRANGEv4 -j ACCEPT
+done;
 fi;
 
 # Allow OUT over tunIF

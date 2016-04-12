@@ -4,7 +4,7 @@
 #
 # Setup Instructions and ReadMe here: https://github.com/ovpn-to/oVPN.to-IPtables-Anti-Leak
 
-EXTIF="wlan0 p4p1 eth0 enp2s0 enp3s0 enp0s25";
+EXTIF="wlan0 wlp3s0 p4p1 eth0 enp2s0 enp3s0 enp4s0 enp0s25";
 TUNIF="tun0";
 OVPNDIR="/etc/openvpn";
 LANRANGESv4="192.168.0.0/16 10.0.123.0/24"

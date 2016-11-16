@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# oVPN.to IPtables Anti-Leak Script v0.1.0
+# oVPN.to IPtables Anti-Leak Script v0.1.1
 #
 # Setup Instructions and ReadMe here: https://github.com/ovpn-to/oVPN.to-IPtables-Anti-Leak
 
@@ -75,7 +75,21 @@ if [ `echo $EXTIF |wc -w` -gt 1 ]; then
           EXTIF=$EXT;
           echo "Using $EXTIF as external Interface";
        else
-          echo "Error: Could not detect any external Interface";
+          $IP4TABLES -P INPUT DROP
+          $IP4TABLES -P FORWARD DROP
+          $IP4TABLES -P OUTPUT DROP
+          $IP6TABLES -P INPUT DROP
+          $IP6TABLES -P FORWARD DROP
+          $IP6TABLES -P OUTPUT DROP
+          echo "Error: Could not detect any external Interface: set POLICY DROP!";
+          echo "Restore manually: 
+          > $IP4TABLES -P INPUT ACCEPT
+          > $IP4TABLES -P FORWARD ACCEPT
+          > $IP4TABLES -P OUTPUT ACCEPT
+          > $IP6TABLES -P INPUT ACCEPT
+          > $IP6TABLES -P FORWARD ACCEPT
+          > $IP6TABLES -P OUTPUT ACCEPT
+          ";
           exit 1;
        fi;
     fi;

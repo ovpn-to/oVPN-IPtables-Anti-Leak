@@ -7,8 +7,8 @@
 EXTIF="wlan0 wlp3s0 p4p1 eth0 enp2s0 enp3s0 enp4s0 enp0s25";
 TUNIF="tun0";
 OVPNDIR="/etc/openvpn";
-LANRANGESv4="192.168.0.0/16 10.0.123.0/24"
-ALLOWLAN="0";
+LANRANGESv4="192.168.0.0/16 10.0.0.0/24"
+ALLOWLAN="1";
 
 ALLOW_LAN_TCP_PORTS=""
 ALLOW_LAN_UDP_PORTS=""
@@ -33,7 +33,7 @@ DEBUGOUTPUT="0";
 ##############################
 
 # Check if we're root
-if [[ $EUID -ne 0 ]]; then
+if [[ "$EUID" -ne 0 ]]; then
    echo "This script must be run as root (e.g. sudo $0)";
    exit 1;
 fi;
@@ -57,21 +57,21 @@ echo "Rules unloaded" && exit 0;
 fi;
 
 # Select external Interface if defined multiple EXTIF="wlan0 p4p1 eth0";
-if [ `echo $EXTIF |wc -w` -gt 1 ]; then
+if [ "`echo $EXTIF |wc -w`" -gt 1 ]; then
    echo -n "Multiple external Interfaces found, try: ";
     for IF in $EXTIF; do
       echo -n " $IF ";
       ifconfig $IF >/dev/null 2>/dev/null && EXT=$IF && break;
       echo -n "(down),";
     done;
-    if [ ! -z $EXT ]; then
+    if [ ! -z "$EXT" ]; then
        EXTIF=$EXT;
        echo -e "\nUsing $EXTIF as external Interface";
        sleep 3;
     else
        echo -e "\nCould not find Interface, trying from route"
        EXT=`route -n |tr -s ' ' | awk '$3=="0.0.0.0" { print $0 }' | cut -d" " -f8`;
-       if [ `echo $EXT |wc -w` -eq 1 ]; then
+       if [ "`echo $EXT |wc -w`" -eq 1 ]; then
           EXTIF=$EXT;
           echo "Using $EXTIF as external Interface";
        else
@@ -125,7 +125,7 @@ $IP4TABLES -A OUTPUT -o lo -j ACCEPT
 $IP6TABLES -A INPUT -i lo -j ACCEPT
 $IP6TABLES -A OUTPUT -o lo -j ACCEPT
 
-if [ $ALLOWLAN -eq "1" ]; then
+if [ "$ALLOWLAN" -eq "1" ]; then
 # Allow LAN access
 for LANRANGEv4 in $LANRANGESv4; do
 $IP4TABLES -A INPUT -i $EXTIF -s $LANRANGEv4 -j ACCEPT 
@@ -156,13 +156,13 @@ while read CONFIGFILE; do
  IPDATA=`echo $REMOTE|cut -d" " -f2`;
  IPPORT=`echo $REMOTE|cut -d" " -f3`;
  test $DEBUGOUTPUT -eq "1" && echo "DEBUG: wc -m `echo $getPROTO | wc -m`";
- if [ `echo $getPROTO | wc -m` -eq "4" ]&&([ $getPROTO = "udp" ]||[ $getPROTO = "tcp" ]||[ $getPROTO = "UDP" ]||[ $getPROTO = "TCP" ]); then
+ if [ "`echo $getPROTO | wc -m`" -eq "4" ]&&([ $getPROTO = "udp" ]||[ $getPROTO = "tcp" ]||[ $getPROTO = "UDP" ]||[ $getPROTO = "TCP" ]); then
   PROTO=$getPROTO;
  else
   PROTO=`grep "proto\ " "$CONFIGFILE" | cut -d" " -f2`;
  fi;
  test $DEBUGOUTPUT -eq "1" && echo "$IPDATA $IPPORT $PROTO";
- if ([ $PROTO = "udp6" ]||[ $PROTO = "tcp6" ]); then
+ if ([ "$PROTO" = "udp6" ]||[ "$PROTO" = "tcp6" ]); then
    test $PROTO = "udp6" && $PROTO="udp";
    test $PROTO = "tcp6" && $PROTO="tcp";
    $IP6TABLES -A OUTPUT -o $EXTIF -d $IPDATA -p $PROTO --dport $IPPORT -j ACCEPT;
@@ -174,7 +174,7 @@ while read CONFIGFILE; do
  L=$(expr $L + 1);
 done < <(echo "$OVPNCONFIGS");
 
-if [ $L -gt "0" ]; then
+if [ "$L" -gt "0" ]; then
  echo "LOADED $L IPs TO TRUSTED IP-POOL";
 else
  echo "ERROR: COULD NOT LOAD IPs FROM CONFIGS. RESTORING FROM BACKUP";
@@ -206,3 +206,4 @@ done
 # STATUS
 $IP4TABLES -nvL
 $IP6TABLES -nvL
+

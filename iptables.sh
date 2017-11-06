@@ -6,7 +6,7 @@
 
 EXTIF="wlan0 wlp3s0 p4p1 eth0 enp2s0 enp3s0 enp4s0 enp0s25";
 TUNIF="tun0";
-OVPNDIR="/etc/openvpn";
+OVPNDIR="/etc/openvpn{,/client}";
 LANRANGESv4="192.168.0.0/16 10.0.123.0/24"
 ALLOWLAN="0";
 
@@ -144,7 +144,7 @@ $IP6TABLES -A OUTPUT -o $TUNIF -p ipv6-icmp -j ACCEPT;
 
 # ALLOW OUTPUT to oVPN-IPs over $EXTIF at VPN-Port with PROTO
 
-OVPNCONFIGS=`ls $OVPNDIR/*.ovpn $OVPNDIR/*.conf`;
+OVPNCONFIGS=`eval ls $OVPNDIR/*.ovpn $OVPNDIR/*.conf`;
 test $DEBUGOUTPUT -eq "1" && echo -e "DEBUG OVPNCONFIGS=\n$OVPNCONFIGS";
 
 L=0;
